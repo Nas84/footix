@@ -19,14 +19,14 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    getAll(): Promise<User[]> {
+    findAll(): Promise<User[]> {
         return this.usersService.findAll();
     }
 
     @UseGuards(JwtAuthGuard)
     @ApiParam({ name: 'id', type: String })
     @Get('/:id')
-    getById(@Param('id') id : string): Promise<User> {
+    findById(@Param('id') id : string): Promise<User> {
         return this.usersService.findOneById(id);
     }
 
