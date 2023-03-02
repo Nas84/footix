@@ -1,4 +1,3 @@
-import { Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
 import { JwtService } from '@nestjs/jwt';
@@ -45,12 +44,14 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return a User when username and password match an existing user', async () => {
-      const expectedResult: User = new User();
+      const user: User = new User();
+      user.username = "user";
+      user.password = "password";
 
-      jest.spyOn(userService, 'findOneByUsername').mockResolvedValue(expectedResult);
+      jest.spyOn(userService, 'findOneByUsername').mockResolvedValue(user);
       jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
 
-      expect(await authService.validateUser('user', 'password')).toEqual(expectedResult);
+      expect(await authService.validateUser('user', 'password')).toEqual({username: 'user'});
     });
 
     it('should return null when username is not found', async () => {

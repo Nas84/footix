@@ -29,6 +29,7 @@
     "@nestjs/swagger": "^6.2.1",
     "@nestjs/typeorm": "^9.0.1",
     "bcrypt": "^5.1.0",
+    "moment": "^2.29.4",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
@@ -77,6 +78,13 @@
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
+    ],
+    "coveragePathIgnorePatterns": [
+      "node_modules",
+      ".module.ts",
+      ".entity.ts",
+      "src/main.ts",
+      ".mock.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
