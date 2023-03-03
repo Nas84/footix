@@ -12,14 +12,14 @@ export class MatchesController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    getAll(): Promise<Match[]> {
+    async getAll(): Promise<Match[]> {
         return this.matchesService.findAll();
     }
 
     @UseGuards(JwtAuthGuard)
     @ApiParam({ name: 'id', type: String })
     @Get('/:id')
-    getById(@Param('id') id : string): Promise<Match> {
+    async getById(@Param('id') id : string): Promise<Match> {
         return this.matchesService.findOneById(id);
     }
 

@@ -26,5 +26,5 @@ export class Match {
     createdAt: String
  
     @UpdateDateColumn()
-    updtedAt: String
+    updatedAt: String
 }

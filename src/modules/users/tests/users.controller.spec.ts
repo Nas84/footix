@@ -1,21 +1,46 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository, UpdateResult } from 'typeorm';
 import { User } from '../user.entity';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
+import { UserRole } from '../user.role'
+import * as moment from 'moment';
 
 describe('UsersController', () => {
   let usersService: UsersService;
   let userController: UsersController;
   
+  let users: User[];
 
   beforeAll(async () => {
+
+    users  = [
+      { id: '1', username: 'admin', password: 'changeme', role: UserRole.Admin, createdAt: moment().format(), updatedAt: moment().format() },
+      { id: '2', username: 'user', password: 'password', role: UserRole.User, createdAt: moment().format(), updatedAt: moment().format() }
+    ];
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [{
-        provide: 'UserRepository',
-        useClass: Repository,
-      }, UsersService]
+        provide: UsersService,
+        useValue: {
+          findAll: jest.fn().mockResolvedValue(users),
+          findOneById: jest.fn().mockResolvedValue(users[0]),
+          create: jest.fn().mockImplementation((user: User) => 
+            Promise.resolve({
+              id: 'id',
+              createdAt: moment().format(),
+              updatedAt: moment().format(),
+              ...user
+            })
+          ),
+          update: jest.fn().mockImplementation((id: string, user: User) => 
+            Promise.resolve({ raw: [], affected: 1 })
+          ),
+          delete: jest.fn().mockImplementation((id: string) => 
+            Promise.resolve({ raw: [], affected: 1 })
+          )
+        }
+      }]
     }).compile();
 
     userController = module.get<UsersController>(UsersController);
@@ -24,49 +49,83 @@ describe('UsersController', () => {
 
   describe('findAll', () => {
     it('should return an array of users', async () => {
-      const expectedResult = [new User()];
-
-      jest.spyOn(usersService, 'findAll').mockResolvedValue(expectedResult);
-      
-      expect(await userController.findAll()).toBe(expectedResult);
+      expect(await userController.findAll()).toBe(users);
     });
   });
 
   describe('findById', () => {
     it('should return a user', async () => {
-      const expectedResult = new User();
+      expect(await userController.findById('ad70f836-fc4c-40bd-8afd-ecc17c2cd4d7')).toBe(users[0]);
+    });
+  });
 
-      jest.spyOn(usersService, 'findOneById').mockResolvedValue(expectedResult);
-      
-      expect(await userController.findById('ad70f836-fc4c-40bd-8afd-ecc17c2cd4d7')).toBe(expectedResult);
+  describe('signup', () => {
+    const user = new User();
+    user.username = 'user';
+    user.password = 'password';
+
+    it('should return a user', async () => {
+      expect(await userController.signup(user)).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          username: user.username,
+          password: expect.any(String),
+          role: UserRole.User,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String)
+        })
+      );
     });
   });
 
   describe('create', () => {
-    const expectedResult = new User();
     const user = new User();
-
+    user.username = 'admin';
+    user.password = 'password';
+    user.role = UserRole.Admin;
+    
     it('should create and returned the saved user', async () => {
-      jest.spyOn(usersService, 'create').mockResolvedValue(expectedResult);
-
-      expect(await userController.create(user)).toBe(expectedResult);
+      expect(await userController.create(user)).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          username: user.username,
+          password: expect.any(String),
+          role: user.role,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String)
+        })
+      );
     });
   });
 
   describe('update', () => {
-    it('should return the updated user', async () => {
-      const expectedResult = new UpdateResult();
-      const user = new User();
+    it('should return an UpdateResult with one affected row', async () => {
+      let user: User = {
+        id: 'id',
+        username: "user",
+        password: "password",
+        role: UserRole.User,
+        createdAt: "2023-02-28T22:44:26.000Z",
+        updatedAt: "2023-02-28T22:44:26.000Z"
+      }
 
-      jest.spyOn(usersService, 'update').mockResolvedValue(expectedResult);
-
-      expect(await userController.update('ad70f836-fc4c-40bd-8afd-ecc17c2cd4d7', user)).toBe(expectedResult);
+      expect(await userController.update('ad70f836-fc4c-40bd-8afd-ecc17c2cd4d7', user)).toEqual(
+        expect.objectContaining({
+          raw: expect.any(Array),
+          affected: 1
+        })
+      );
     });
   });
 
   describe('delete', () => {
-    it('should delete the user', async () => {
-
+    it('should be return a DeleteResult with one affected row', async () => {
+      expect(await userController.delete('1')).toEqual(
+        expect.objectContaining({
+          raw: expect.any(Array),
+          affected: 1
+        })
+      );
     });
   });
 });

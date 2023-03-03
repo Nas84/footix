@@ -12,14 +12,14 @@ export class TeamsController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    getAll(): Promise<Team[]> {
+    async getAll(): Promise<Team[]> {
         return this.teamsService.findAll();
     }
 
     @UseGuards(JwtAuthGuard)
     @ApiParam({ name: 'id', type: String })
     @Get('/:id')
-    getById(@Param('id') id : string): Promise<Team> {
+    async getById(@Param('id') id : string): Promise<Team> {
         return this.teamsService.findOneById(id);
     }
 
