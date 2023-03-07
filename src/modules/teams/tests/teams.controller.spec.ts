@@ -3,6 +3,7 @@ import { Team } from '../team.entity';
 import { TeamsController } from '../teams.controller';
 import { TeamsService } from '../teams.service';
 import * as moment from 'moment';
+import { NotFoundException } from '@nestjs/common';
 
 describe('TeamsController', () => {
   let teamsService: TeamsService;
@@ -23,7 +24,7 @@ describe('TeamsController', () => {
           provide: TeamsService,
           useValue: {
             findAll: jest.fn().mockResolvedValue(teams),
-            findOneById: jest.fn().mockResolvedValue(teams[0]),
+            findOneById: jest.fn(),
             create: jest.fn().mockImplementation((team: Team) => 
               Promise.resolve({
                 id: 'id',
@@ -32,12 +33,8 @@ describe('TeamsController', () => {
                 ...team
               })
             ),
-            update: jest.fn().mockImplementation((id: string, team: Team) => 
-              Promise.resolve({ raw: [], affected: 1 })
-            ),
-            delete: jest.fn().mockImplementation((id: string) => 
-              Promise.resolve({ raw: [], affected: 1 })
-            )
+            update: jest.fn(),
+            delete: jest.fn()
           }
         }
       ]
@@ -52,17 +49,25 @@ describe('TeamsController', () => {
       expect(await teamsController.getAll()).toBe(teams);
     });
   });
-  
+
   describe('getById', () => {
-    it('should return a team', async () => {
+    it('should be return 204 No Content when team is successfully deleted', async () => {
+      jest.spyOn(teamsService, 'findOneById').mockResolvedValue(teams[0]);
+
       expect(await teamsController.getById('1')).toBe(teams[0]);
+    });
+
+    it('should be return 404 Not Found Exception if no team deleted', async () => {
+      jest.spyOn(teamsService, 'findOneById').mockRejectedValue(new NotFoundException());
+
+      await expect(async () => { await teamsController.getById('1') } ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('create', () => {
     it('should return a team', async () => {
-      let team: Team = new Team();
-      team.name = "Team";
+      const team: Team = new Team();
+      team.name = 'Team';
 
       expect(await teamsController.create(team)).toEqual(
         expect.objectContaining({
@@ -76,31 +81,37 @@ describe('TeamsController', () => {
   });
 
   describe('update', () => {
-    it('should be return an UpdateResult with one affected row', async () => {
-      let team: Team = {
-        id: 'id',
-        name: "Team",
-        createdAt: "2023-02-28T22:44:26.000Z",
-        updatedAt: "2023-02-28T22:44:26.000Z"
-      }
+    let team: Team = {
+      id: 'id',
+      name: "Team",
+      createdAt: "2023-02-28T22:44:26.000Z",
+      updatedAt: "2023-02-28T22:44:26.000Z"
+    };
+    
+    it('should be return 204 No Content when team is successfully updated', async () => {
+      jest.spyOn(teamsService, 'update').mockResolvedValue({ raw: [], affected: 1, generatedMaps: [] });
 
-      expect(await teamsController.update(team.id, team)).toEqual(
-        expect.objectContaining({
-          raw: expect.any(Array),
-          affected: 1
-        })
-      );
+      expect(await teamsController.update('1', team)).not.toBeDefined();
+    });
+
+    it('should be return 204 No Content when team is successfully updated', async () => {
+      jest.spyOn(teamsService, 'update').mockResolvedValue({ raw: [], affected: 0, generatedMaps: [] });
+
+      await expect(async () => {await teamsController.update('1', team) }).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('delete', () => {
-    it('should be return a DeleteResult with one affected row', async () => {
-      expect(await teamsController.delete('1')).toEqual(
-        expect.objectContaining({
-          raw: expect.any(Array),
-          affected: 1
-        })
-      );
+    it('should be return 204 No Content when team is successfully deleted', async () => {
+      jest.spyOn(teamsService, 'delete').mockResolvedValue({ raw: [], affected: 1 });
+
+      expect(await teamsController.delete('1')).not.toBeDefined();
+    });
+
+    it('should be return 404 Not Found Exception if no team deleted', async () => {
+      jest.spyOn(teamsService, 'delete').mockResolvedValue({ raw: [], affected: 0 });
+
+      await expect(async () => { await teamsController.delete('1') } ).rejects.toThrow(NotFoundException);
     });
   });
 });

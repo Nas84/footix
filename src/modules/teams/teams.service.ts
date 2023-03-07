@@ -16,8 +16,8 @@ export class TeamsService {
         return await this.teamsRepository.find();
     }
 
-    async findOneById(id: string): Promise<any> {
-        return await this.teamsRepository.findOneOrFail({where: {id: id} });
+    async findOneById(id: string): Promise<Team> {
+        return this.teamsRepository.findOneOrFail({where: {id: id} });
     }
 
     async create(team: Team): Promise<Team> {
