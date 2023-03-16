@@ -1,14 +1,25 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  HttpCode,
+  NotFoundException
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
-import { UserRole } from './user.role'
+import { UserRole } from './user.role';
 import { ApiBody, ApiTags, ApiParam } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Users')
 @Controller('api/users')
 export class UsersController {
-    constructor(private usersService: UsersService) { }
+    constructor(private usersService: UsersService) {}
 
     @ApiBody({ type: [User] })
     @Post('signup')
@@ -26,8 +37,10 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @ApiParam({ name: 'id', type: String })
     @Get('/:id')
-    findById(@Param('id') id : string): Promise<User> {
-        return this.usersService.findOneById(id);
+    findById(@Param('id') id: string): Promise<User> {
+        return this.usersService.findOneById(id)
+            .then((user) => { return user; })
+            .catch((reason) => { throw new NotFoundException(`User ${id} not found`) });
     }
 
     @UseGuards(JwtAuthGuard)
@@ -41,13 +54,23 @@ export class UsersController {
     @ApiParam({ name: 'id', type: String })
     @ApiBody({ type: [User] })
     @Put('/:id')
-    async update(@Param('id') id : string, @Body() user : User): Promise<any> {
-        return this.usersService.update(id, user);
+    @HttpCode(204)
+    async update(@Param('id') id: string, @Body() user: User): Promise<any> {
+        const result = await this.usersService.update(id, user);
+
+        if (result.affected === 0) {
+            throw new NotFoundException();
+        }
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete('/:id')
-    async delete(@Param('id') id : string ): Promise<any> {
-        return this.usersService.delete(id);
+    @HttpCode(204)
+    async delete(@Param('id') id: string): Promise<any> {
+        const result = await this.usersService.delete(id);
+
+        if (result.affected === 0) {
+            throw new NotFoundException();
+        }
     }
 }

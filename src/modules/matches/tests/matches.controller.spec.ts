@@ -3,6 +3,7 @@ import { MatchesController } from '../matches.controller';
 import { MatchesService } from '../matches.service';
 import { Match } from '../match.entity';
 import * as moment from 'moment';
+import { NotFoundException } from '@nestjs/common';
 
 describe('MatchesController', () => {
   let matchesController: MatchesController;
@@ -24,19 +25,15 @@ describe('MatchesController', () => {
           provide: MatchesService,
           useValue: {
             findAll: jest.fn().mockResolvedValue(matches),
-            findOneById: jest.fn().mockResolvedValue(matches[0]),
+            findOneById: jest.fn(),
             create: jest.fn().mockImplementation( (match) => Promise.resolve({
               ...match,
               id: 'id',
               createdAt: moment().format(),
               updatedAt: moment().format(),
             })),
-            update: jest.fn().mockImplementation((id: string, match: Match) => 
-              Promise.resolve({ raw: [], affected: 1 })
-            ),
-            delete: jest.fn().mockImplementation((id: string) => 
-              Promise.resolve({ raw: [], affected: 1 })
-            )
+            update: jest.fn(),
+            delete: jest.fn()
           }
         }
       ]
@@ -54,7 +51,13 @@ describe('MatchesController', () => {
 
   describe('getById', () => {
     it('should return a match', async () => {
+      jest.spyOn(matchesService, 'findOneById').mockResolvedValue(matches[0]);
       expect(await matchesController.getById('1')).toBe(matches[0]);
+    });
+
+    it('should return 404 Not Found exception if match is not found', async () => {
+      jest.spyOn(matchesService, 'findOneById').mockRejectedValue(new NotFoundException());
+      await expect(async () => await matchesController.getById('1')).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -81,24 +84,26 @@ describe('MatchesController', () => {
   });
 
   describe('update', () => {
-    it('should return an UpdateResult with one affected row', async () => {
-      expect(await matchesController.update('1', matches[0])).toEqual(
-        expect.objectContaining({
-          raw: expect.any(Array),
-          affected: 1
-        })
-      );
+    it('should return 204 if the match is updated', async () => {
+      jest.spyOn(matchesService, 'update').mockResolvedValue({ raw: [], affected: 1, generatedMaps: [] });
+      expect(await matchesController.update('1', matches[0])).not.toBeDefined();
+    });
+
+    it('should return 404 Not Found if the match is not updated', async () => {
+      jest.spyOn(matchesService, 'update').mockResolvedValue({ raw: [], affected: 0, generatedMaps: [] });
+      await expect(async () => { await matchesController.update('3', matches[0]) }).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('delete', () => {
-    it('should return a DeleteResult with one affected row', async () => {
-      expect(await matchesController.delete('1')).toEqual(
-        expect.objectContaining({
-          raw: expect.any(Array),
-          affected: 1
-        })
-      );
+    it('should return 204 if the match is deleted', async () => {
+      jest.spyOn(matchesService, 'delete').mockResolvedValue({ raw: [], affected: 1 });
+      expect(await matchesController.delete('1')).not.toBeDefined();
+    });
+
+    it('should return 404 Not Found if the match is not deleted', async () => {
+      jest.spyOn(matchesService, 'delete').mockResolvedValue({ raw: [], affected: 0 });
+      await expect(async () => { await matchesController.delete('3') }).rejects.toThrow(NotFoundException);
     });
   });
 });

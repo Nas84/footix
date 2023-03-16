@@ -1,14 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, HttpCode, NotFoundException } from '@nestjs/common';
 import { Match } from './match.entity';
 import { MatchesService } from './matches.service';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('Matches')
 @Controller('api/matches')
 export class MatchesController {
 
-    constructor(private matchesService: MatchesService) { }
+    constructor(private matchesService: MatchesService) {}
 
     @UseGuards(JwtAuthGuard)
     @Get()
@@ -20,7 +20,12 @@ export class MatchesController {
     @ApiParam({ name: 'id', type: String })
     @Get('/:id')
     async getById(@Param('id') id : string): Promise<Match> {
-        return this.matchesService.findOneById(id);
+        try {
+            return await this.matchesService.findOneById(id);
+        }
+        catch(err) {
+            throw new NotFoundException();
+        }
     }
 
     @UseGuards(JwtAuthGuard)
@@ -34,13 +39,23 @@ export class MatchesController {
     @ApiParam({ name: 'id', type: String })
     @ApiBody({ type: [Match] })
     @Put('/:id')
-    async update(@Param('id') id : string, @Body() match : Match): Promise<any> {
-        return this.matchesService.update(id, match);
+    @HttpCode(204)
+    async update(@Param('id') id: string, @Body() match: Match): Promise<any> {
+        const result = await this.matchesService.update(id, match);
+
+        if (result.affected === 0) {
+            throw new NotFoundException();
+        }
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete('/:id')
-    async delete(@Param('id') id : string ): Promise<any> {
-        return this.matchesService.delete(id);
+    @HttpCode(204)
+    async delete(@Param('id') id: string): Promise<any> {
+        const result = await this.matchesService.delete(id);
+
+        if (result.affected === 0) {
+            throw new NotFoundException();
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm';
 import { User } from './user.entity';
@@ -7,11 +7,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
-
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>
-    ) { }
+    ) {}
 
     async create(user: User): Promise<User> {
         user.id = uuidv4();
@@ -21,12 +20,12 @@ export class UsersService {
         return await this.usersRepository.save(user);
     }
 
-    async findOneById(id: string): Promise<User | undefined> {
-        return this.usersRepository.findOne({where: {id: id}});
+    async findOneById(id: string): Promise<User> {
+        return await this.usersRepository.findOneOrFail({ where: { id: id } });
     }
 
-    async findOneByUsername(username: string): Promise<User | undefined> {
-        return this.usersRepository.findOne({where: {username: username}});
+    async findOneByUsername(username: string): Promise<User> {
+        return await this.usersRepository.findOneOrFail({ where: { username: username } });
     }
 
     async findAll(): Promise<User[]> {
@@ -37,9 +36,8 @@ export class UsersService {
         user.id = id;
         return await this.usersRepository.update(user.id, user);
     }
-    
+
     async delete(id: string): Promise<DeleteResult> {
         return await this.usersRepository.delete(id);
     }
-
 }
