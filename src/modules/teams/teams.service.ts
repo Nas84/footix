@@ -6,18 +6,17 @@ import { Team } from './team.entity';
 
 @Injectable()
 export class TeamsService {
-
     constructor(
         @InjectRepository(Team)
         private teamsRepository: Repository<Team>
-    ) { }
+    ) {}
 
     async findAll(): Promise<Team[]> {
         return await this.teamsRepository.find();
     }
 
     async findOneById(id: string): Promise<Team> {
-        return this.teamsRepository.findOneOrFail({where: {id: id} });
+        return await this.teamsRepository.findOneOrFail({ where: { id: id } });
     }
 
     async create(team: Team): Promise<Team> {
@@ -29,7 +28,7 @@ export class TeamsService {
         team.id = id;
         return await this.teamsRepository.update(team.id, team);
     }
-    
+
     async delete(id: string): Promise<DeleteResult> {
         return await this.teamsRepository.delete(id);
     }

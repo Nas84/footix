@@ -51,13 +51,13 @@ describe('TeamsController', () => {
   });
 
   describe('getById', () => {
-    it('should be return 204 No Content when team is successfully deleted', async () => {
+    it('should be return a team', async () => {
       jest.spyOn(teamsService, 'findOneById').mockResolvedValue(teams[0]);
 
       expect(await teamsController.getById('1')).toBe(teams[0]);
     });
 
-    it('should be return 404 Not Found Exception if no team deleted', async () => {
+    it('should be return 404 Not Found Exception if no team is found', async () => {
       jest.spyOn(teamsService, 'findOneById').mockRejectedValue(new NotFoundException());
 
       await expect(async () => { await teamsController.getById('1') } ).rejects.toThrow(NotFoundException);
@@ -94,7 +94,7 @@ describe('TeamsController', () => {
       expect(await teamsController.update('1', team)).not.toBeDefined();
     });
 
-    it('should be return 204 No Content when team is successfully updated', async () => {
+    it('should be return 404 Not Found Exception if no team update', async () => {
       jest.spyOn(teamsService, 'update').mockResolvedValue({ raw: [], affected: 0, generatedMaps: [] });
 
       await expect(async () => {await teamsController.update('1', team) }).rejects.toThrow(NotFoundException);
