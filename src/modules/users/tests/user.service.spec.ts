@@ -14,10 +14,23 @@ describe('UserService', () => {
   let users: User[];
 
   beforeAll(async () => {
-
-    users  = [
-      { id: '1', username: 'admin', password: 'changeme', role: UserRole.Admin, createdAt: moment().format(), updatedAt: moment().format() },
-      { id: '2', username: 'user', password: 'password', role: UserRole.User, createdAt: moment().format(), updatedAt: moment().format() }
+    users = [
+      {
+        id: '1',
+        username: 'admin',
+        password: 'changeme',
+        role: UserRole.Admin,
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      },
+      {
+        id: '2',
+        username: 'user',
+        password: 'password',
+        role: UserRole.User,
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      }
     ];
 
     const module: TestingModule = await Test.createTestingModule({
@@ -29,7 +42,7 @@ describe('UserService', () => {
           useValue: {
             find: jest.fn().mockResolvedValue(users),
             findOneOrFail: jest.fn(),
-            save: jest.fn().mockImplementation((user: User) => 
+            save: jest.fn().mockImplementation((user: User) =>
               Promise.resolve({
                 id: 'id',
                 createdAt: moment().format(),
@@ -37,12 +50,10 @@ describe('UserService', () => {
                 ...user
               })
             ),
-            update: jest.fn().mockImplementation((id: string, user: User) => 
-              Promise.resolve({ raw: [], affected: 1 })
-            ),
-            delete: jest.fn().mockImplementation((id: string) => 
-              Promise.resolve({ raw: [], affected: 1 })
-            )
+            /* eslint-disable */
+            update: jest.fn().mockImplementation((id: string, user: User) => Promise.resolve({ raw: [], affected: 1 })),
+            delete: jest.fn().mockImplementation((id: string) => Promise.resolve({ raw: [], affected: 1 }))
+            /* eslint-enable */
           }
         }
       ]
@@ -54,7 +65,7 @@ describe('UserService', () => {
 
   describe('findAll', () => {
     it('should return all users', async () => {
-      expect(await usersService.findAll()).toBe(users);;
+      expect(await usersService.findAll()).toBe(users);
     });
   });
 
@@ -67,7 +78,9 @@ describe('UserService', () => {
     it('should reject the promise if the user is not found', async () => {
       const id = '16763be4-6022-406e-a950-fcd5018633ca';
       jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValue(`User ${id} not found`);
-      await expect(async () => { await usersService.findOneById(id) }).rejects.toEqual(`User ${id} not found`);
+      await expect(async () => {
+        await usersService.findOneById(id);
+      }).rejects.toEqual(`User ${id} not found`);
     });
   });
 
@@ -80,9 +93,10 @@ describe('UserService', () => {
 
   describe('create', () => {
     it('should return a user', async () => {
-      let user: User = new User();
-      user.username = "User";
+      const user: User = new User();
+      user.username = 'User';
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       jest.spyOn(bcrypt, 'hash').mockImplementation((data, salt) => Promise.resolve(''));
 
       expect(await usersService.create(user)).toEqual(
@@ -99,14 +113,14 @@ describe('UserService', () => {
 
   describe('update', () => {
     it('should return an UpdateResult with one raw affected', async () => {
-      let user: User = {
+      const user: User = {
         id: 'id',
-        username: "user",
-        password: "password",
+        username: 'user',
+        password: 'password',
         role: UserRole.Admin,
-        createdAt: "2023-02-28T22:44:26.000Z",
-        updatedAt: "2023-02-28T22:44:26.000Z"
-      }
+        createdAt: '2023-02-28T22:44:26.000Z',
+        updatedAt: '2023-02-28T22:44:26.000Z'
+      };
 
       expect(await usersService.update(user.id, user)).toEqual(
         expect.objectContaining({

@@ -1,30 +1,28 @@
-import { Entity, Column, CreateDateColumn, UpdateDateColumn, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm'
-import { ApiProperty } from '@nestjs/swagger';
-import { Team } from '../teams/team.entity'
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Team } from '../teams/team.entity';
 
 @Entity()
 export class Match {
+  @PrimaryColumn()
+  id: string;
 
-    @PrimaryColumn()
-    id: string
+  @ManyToOne(() => Team)
+  @JoinColumn()
+  home_team: Team;
 
-    @ManyToOne(() => Team)
-    @JoinColumn()
-    home_team: Team
+  @Column()
+  home_score: number;
 
-    @Column()
-    home_score: Number
+  @ManyToOne(() => Team)
+  @JoinColumn()
+  away_team: Team;
 
-    @ManyToOne(() => Team)
-    @JoinColumn()
-    away_team: Team
+  @Column()
+  away_score: number;
 
-    @Column()
-    away_score: Number
+  @CreateDateColumn()
+  createdAt: string;
 
-    @CreateDateColumn()
-    createdAt: String
- 
-    @UpdateDateColumn()
-    updatedAt: String
+  @UpdateDateColumn()
+  updatedAt: string;
 }
