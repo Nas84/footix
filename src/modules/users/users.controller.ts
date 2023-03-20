@@ -30,17 +30,19 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    findAll(): Promise<User[]> {
+    async findAll(): Promise<User[]> {
         return this.usersService.findAll();
     }
 
     @UseGuards(JwtAuthGuard)
     @ApiParam({ name: 'id', type: String })
     @Get('/:id')
-    findById(@Param('id') id: string): Promise<User> {
-        return this.usersService.findOneById(id)
-            .then((user) => { return user; })
-            .catch((reason) => { throw new NotFoundException(`User ${id} not found`) });
+    async findById(@Param('id') id: string): Promise<User> {
+        try {
+            return await this.usersService.findOneById(id);
+        } catch(err) {
+            throw new NotFoundException(`User ${id} not found`);
+        }
     }
 
     @UseGuards(JwtAuthGuard)

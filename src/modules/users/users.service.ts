@@ -17,27 +17,27 @@ export class UsersService {
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(user.password, salt);
         user.password = hash;
-        return await this.usersRepository.save(user);
+        return this.usersRepository.save(user);
     }
 
     async findOneById(id: string): Promise<User> {
-        return await this.usersRepository.findOneOrFail({ where: { id: id } });
+        return this.usersRepository.findOneOrFail({ where: { id: id } });
     }
 
     async findOneByUsername(username: string): Promise<User> {
-        return await this.usersRepository.findOneOrFail({ where: { username: username } });
+        return this.usersRepository.findOneOrFail({ where: { username: username } });
     }
 
     async findAll(): Promise<User[]> {
-        return await this.usersRepository.find();
+        return this.usersRepository.find();
     }
 
     async update(id: string, user: User): Promise<UpdateResult> {
         user.id = id;
-        return await this.usersRepository.update(user.id, user);
+        return this.usersRepository.update(user.id, user);
     }
 
     async delete(id: string): Promise<DeleteResult> {
-        return await this.usersRepository.delete(id);
+        return this.usersRepository.delete(id);
     }
 }
