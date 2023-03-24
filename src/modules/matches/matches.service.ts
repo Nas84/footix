@@ -12,24 +12,24 @@ export class MatchesService {
   ) {}
 
   async findAll(): Promise<Match[]> {
-    return await this.matchesRepository.find();
+    return this.matchesRepository.find();
   }
 
   async findOneById(id: string): Promise<any> {
-    return await this.matchesRepository.findOneOrFail({ where: { id: id } });
+    return this.matchesRepository.findOneOrFail({ where: { id: id } });
   }
 
   async create(match: Match): Promise<Match> {
     match.id = uuidv4();
-    return await this.matchesRepository.save(match);
+    return this.matchesRepository.save(match);
   }
 
   async update(id: string, match: Match): Promise<UpdateResult> {
     match.id = id;
-    return await this.matchesRepository.update(match.id, match);
+    return this.matchesRepository.update(match.id, match);
   }
 
   async delete(id: string): Promise<DeleteResult> {
-    return await this.matchesRepository.delete(id);
+    return this.matchesRepository.delete(id);
   }
 }

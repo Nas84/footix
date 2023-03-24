@@ -68,7 +68,6 @@ describe('UsersController', () => {
   describe('findById', () => {
     it('should return a user if exists', async () => {
       jest.spyOn(usersService, 'findOneById').mockResolvedValue(users[0]);
-
       expect(await userController.findById('ad70f836-fc4c-40bd-8afd-ecc17c2cd4d7')).toBe(users[0]);
     });
 
@@ -148,7 +147,6 @@ describe('UsersController', () => {
   describe('delete', () => {
     it('should be return 204 No Content when the user is successfully deleted', async () => {
       jest.spyOn(usersService, 'delete').mockResolvedValue({ raw: [], affected: 1 });
-
       expect(await userController.delete('1')).not.toBeDefined();
     });
 

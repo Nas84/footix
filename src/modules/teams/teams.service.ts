@@ -12,24 +12,24 @@ export class TeamsService {
   ) {}
 
   async findAll(): Promise<Team[]> {
-    return await this.teamsRepository.find();
+    return this.teamsRepository.find();
   }
 
   async findOneById(id: string): Promise<Team> {
-    return await this.teamsRepository.findOneOrFail({ where: { id: id } });
+    return this.teamsRepository.findOneOrFail({ where: { id: id } });
   }
 
   async create(team: Team): Promise<Team> {
     team.id = uuidv4();
-    return await this.teamsRepository.save(team);
+    return this.teamsRepository.save(team);
   }
 
   async update(id: string, team: Team): Promise<UpdateResult> {
     team.id = id;
-    return await this.teamsRepository.update(team.id, team);
+    return this.teamsRepository.update(team.id, team);
   }
 
   async delete(id: string): Promise<DeleteResult> {
-    return await this.teamsRepository.delete(id);
+    return this.teamsRepository.delete(id);
   }
 }
