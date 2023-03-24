@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UsersService } from '../users.service';
 import { User } from '../user.entity';
-import { UserRole } from '../user.role'
+import { UserRole } from '../user.role';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
 
 describe('UserService', () => {
   let usersService: UsersService;
+  let usersRepository: Repository<User>;
 
   let users: User[];
 
@@ -26,7 +28,7 @@ describe('UserService', () => {
           provide: getRepositoryToken(User),
           useValue: {
             find: jest.fn().mockResolvedValue(users),
-            findOne: jest.fn().mockResolvedValue(users[0]),
+            findOneOrFail: jest.fn(),
             save: jest.fn().mockImplementation((user: User) => 
               Promise.resolve({
                 id: 'id',
@@ -47,30 +49,39 @@ describe('UserService', () => {
     }).compile();
 
     usersService = module.get<UsersService>(UsersService);
+    usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   describe('findAll', () => {
-    it('should return one team', async () => {
+    it('should return all users', async () => {
       expect(await usersService.findAll()).toBe(users);;
     });
   });
 
   describe('findOneById', () => {
-    it('should return one team', async () => {
-      expect(await usersService.findOneById('1')).toBe(users[0]);;
+    it('should return a user', async () => {
+      jest.spyOn(usersRepository, 'findOneOrFail').mockResolvedValue(users[0]);
+      expect(await usersService.findOneById('1')).toBe(users[0]);
+    });
+
+    it('should reject the promise if the user is not found', async () => {
+      const id = '16763be4-6022-406e-a950-fcd5018633ca';
+      jest.spyOn(usersRepository, 'findOneOrFail').mockRejectedValue(`User ${id} not found`);
+      await expect(async () => { await usersService.findOneById(id) }).rejects.toEqual(`User ${id} not found`);
     });
   });
 
   describe('findOneByUsername', () => {
-    it('should return one team', async () => {
-      expect(await usersService.findOneByUsername('admin')).toBe(users[0]);;
+    it('should return one user', async () => {
+      jest.spyOn(usersRepository, 'findOneOrFail').mockResolvedValue(users[0]);
+      expect(await usersService.findOneByUsername('admin')).toBe(users[0]);
     });
   });
 
   describe('create', () => {
-    it('should return a team', async () => {
+    it('should return a user', async () => {
       let user: User = new User();
-      user.username = "Team";
+      user.username = "User";
 
       jest.spyOn(bcrypt, 'hash').mockImplementation((data, salt) => Promise.resolve(''));
 

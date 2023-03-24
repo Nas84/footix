@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, HttpCode, NotFoundException } from '@nestjs/common';
 import { Team } from './team.entity';
 import { TeamsService } from './teams.service';
 import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
@@ -18,9 +18,14 @@ export class TeamsController {
 
     @UseGuards(JwtAuthGuard)
     @ApiParam({ name: 'id', type: String })
-    @Get('/:id')
+    @Get(':id')
     async getById(@Param('id') id : string): Promise<Team> {
-        return this.teamsService.findOneById(id);
+        try {
+            return await this.teamsService.findOneById(id);
+        }
+        catch(err) {
+            throw new NotFoundException();
+        }
     }
 
     @UseGuards(JwtAuthGuard)
@@ -33,14 +38,24 @@ export class TeamsController {
     @UseGuards(JwtAuthGuard)
     @ApiParam({ name: 'id', type: String })
     @ApiBody({ type: [Team] })
-    @Put('/:id')
+    @Put(':id')
+    @HttpCode(204)
     async update(@Param('id') id : string, @Body() team : Team): Promise<any> {
-        return this.teamsService.update(id, team);
+        const result = await this.teamsService.update(id, team);
+
+        if (result.affected === 0) {
+            throw new NotFoundException();
+        }
     }
 
     @UseGuards(JwtAuthGuard)
-    @Delete('/:id')
+    @Delete(':id')
+    @HttpCode(204)
     async delete(@Param('id') id : string ): Promise<any> {
-        return this.teamsService.delete(id);
+        const result = await this.teamsService.delete(id);
+
+        if (result.affected === 0) {
+            throw new NotFoundException();
+        }
     }
 }
