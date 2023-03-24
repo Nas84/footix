@@ -6,30 +6,30 @@ import { Team } from './team.entity';
 
 @Injectable()
 export class TeamsService {
-    constructor(
-        @InjectRepository(Team)
-        private teamsRepository: Repository<Team>
-    ) {}
+  constructor(
+    @InjectRepository(Team)
+    private teamsRepository: Repository<Team>
+  ) {}
 
-    async findAll(): Promise<Team[]> {
-        return this.teamsRepository.find();
-    }
+  async findAll(): Promise<Team[]> {
+    return this.teamsRepository.find();
+  }
 
-    async findOneById(id: string): Promise<Team> {
-        return this.teamsRepository.findOneOrFail({ where: { id: id } });
-    }
+  async findOneById(id: string): Promise<Team> {
+    return this.teamsRepository.findOneOrFail({ where: { id: id } });
+  }
 
-    async create(team: Team): Promise<Team> {
-        team.id = uuidv4();
-        return this.teamsRepository.save(team);
-    }
+  async create(team: Team): Promise<Team> {
+    team.id = uuidv4();
+    return this.teamsRepository.save(team);
+  }
 
-    async update(id: string, team: Team): Promise<UpdateResult> {
-        team.id = id;
-        return this.teamsRepository.update(team.id, team);
-    }
+  async update(id: string, team: Team): Promise<UpdateResult> {
+    team.id = id;
+    return this.teamsRepository.update(team.id, team);
+  }
 
-    async delete(id: string): Promise<DeleteResult> {
-        return this.teamsRepository.delete(id);
-    }
+  async delete(id: string): Promise<DeleteResult> {
+    return this.teamsRepository.delete(id);
+  }
 }

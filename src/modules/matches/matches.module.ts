@@ -10,4 +10,4 @@ import { Match } from './match.entity';
   exports: [MatchesService],
   controllers: [MatchesController]
 })
-export class MatchesModule { }
+export class MatchesModule {}

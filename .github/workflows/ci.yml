@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-
+    name: Build
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,12 +20,18 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Step 1 - Checkout main
+      uses: actions/checkout@v3
+    - name: Step 2 - Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    - name: Step 3 - Run npm install
+      run: npm ci
+    - name: Step 4 - Run build
+      run: npm run build --if-present
+    - name: Step 5 - Run linter
+      run: npm run lint
+    - name: Step 6 - Run tests
+      run: npm run test:cov

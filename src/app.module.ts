@@ -6,13 +6,19 @@ import { TeamsModule } from './modules/teams/teams.module';
 import { MatchesModule } from './modules/matches/matches.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot({
+  imports: [
+    TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'var/footix.db',
-      entities: [__dirname + "/**/*.entity{.ts,.js}"],
-      synchronize: true,
-    }), AuthModule, UsersModule, TeamsModule, MatchesModule],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true
+    }),
+    AuthModule,
+    UsersModule,
+    TeamsModule,
+    MatchesModule
+  ],
   controllers: [],
-  providers: [],
+  providers: []
 })
 export class AppModule {}

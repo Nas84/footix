@@ -11,10 +11,19 @@ describe('TeamsController', () => {
   let teams: Team[];
 
   beforeAll(async () => {
-
     teams = [
-      { id: '1', name: 'Team1', createdAt: moment().format(), updatedAt: moment().format() },
-      { id: '2', name: 'Team2', createdAt: moment().format(), updatedAt: moment().format() }
+      {
+        id: '1',
+        name: 'Team1',
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      },
+      {
+        id: '2',
+        name: 'Team2',
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      }
     ];
 
     const module: TestingModule = await Test.createTestingModule({
@@ -25,7 +34,7 @@ describe('TeamsController', () => {
           useValue: {
             findAll: jest.fn().mockResolvedValue(teams),
             findOneById: jest.fn(),
-            create: jest.fn().mockImplementation((team: Team) => 
+            create: jest.fn().mockImplementation((team: Team) =>
               Promise.resolve({
                 id: 'id',
                 createdAt: moment().format(),
@@ -60,7 +69,10 @@ describe('TeamsController', () => {
     it('should be return 404 Not Found Exception if no team is found', async () => {
       jest.spyOn(teamsService, 'findOneById').mockRejectedValue(new NotFoundException());
 
-      await expect(async () => { await teamsController.getById('1') } ).rejects.toThrow(NotFoundException);
+      // eslint-disable-next-line prettier/prettier
+      await expect(async () => {
+        await teamsController.getById('1');
+      }).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -81,13 +93,13 @@ describe('TeamsController', () => {
   });
 
   describe('update', () => {
-    let team: Team = {
+    const team: Team = {
       id: 'id',
-      name: "Team",
-      createdAt: "2023-02-28T22:44:26.000Z",
-      updatedAt: "2023-02-28T22:44:26.000Z"
+      name: 'Team',
+      createdAt: '2023-02-28T22:44:26.000Z',
+      updatedAt: '2023-02-28T22:44:26.000Z'
     };
-    
+
     it('should be return 204 No Content when team is successfully updated', async () => {
       jest.spyOn(teamsService, 'update').mockResolvedValue({ raw: [], affected: 1, generatedMaps: [] });
 
@@ -97,7 +109,10 @@ describe('TeamsController', () => {
     it('should be return 404 Not Found Exception if no team update', async () => {
       jest.spyOn(teamsService, 'update').mockResolvedValue({ raw: [], affected: 0, generatedMaps: [] });
 
-      await expect(async () => {await teamsController.update('1', team) }).rejects.toThrow(NotFoundException);
+      // eslint-disable-next-line prettier/prettier
+      await expect(async () => {
+        await teamsController.update('1', team);
+      }).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -111,7 +126,10 @@ describe('TeamsController', () => {
     it('should be return 404 Not Found Exception if no team deleted', async () => {
       jest.spyOn(teamsService, 'delete').mockResolvedValue({ raw: [], affected: 0 });
 
-      await expect(async () => { await teamsController.delete('1') } ).rejects.toThrow(NotFoundException);
+      // eslint-disable-next-line prettier/prettier
+      await expect(async () => {
+        await teamsController.delete('1');
+      }).rejects.toThrow(NotFoundException);
     });
   });
 });

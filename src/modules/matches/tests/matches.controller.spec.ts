@@ -11,10 +11,25 @@ describe('MatchesController', () => {
   let matches: Match[];
 
   beforeAll(async () => {
-
     matches = [
-      { id: '1', home_team: null, home_score: 0, away_team: null, away_score: 0, createdAt: moment().format(), updatedAt: moment().format() },
-      { id: '2', home_team: null, home_score: 0, away_team: null, away_score: 0, createdAt: moment().format(), updatedAt: moment().format() },
+      {
+        id: '1',
+        home_team: null,
+        home_score: 0,
+        away_team: null,
+        away_score: 0,
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      },
+      {
+        id: '2',
+        home_team: null,
+        home_score: 0,
+        away_team: null,
+        away_score: 0,
+        createdAt: moment().format(),
+        updatedAt: moment().format()
+      }
     ];
 
     const module: TestingModule = await Test.createTestingModule({
@@ -26,12 +41,14 @@ describe('MatchesController', () => {
           useValue: {
             findAll: jest.fn().mockResolvedValue(matches),
             findOneById: jest.fn(),
-            create: jest.fn().mockImplementation( (match) => Promise.resolve({
-              ...match,
-              id: 'id',
-              createdAt: moment().format(),
-              updatedAt: moment().format(),
-            })),
+            create: jest.fn().mockImplementation((match) =>
+              Promise.resolve({
+                ...match,
+                id: 'id',
+                createdAt: moment().format(),
+                updatedAt: moment().format()
+              })
+            ),
             update: jest.fn(),
             delete: jest.fn()
           }
@@ -63,7 +80,7 @@ describe('MatchesController', () => {
 
   describe('create', () => {
     it('should create a match', async () => {
-      let match = new Match();
+      const match = new Match();
       match.home_score = 1;
       match.home_team = null;
       match.away_score = 2;
@@ -91,7 +108,9 @@ describe('MatchesController', () => {
 
     it('should return 404 Not Found if the match is not updated', async () => {
       jest.spyOn(matchesService, 'update').mockResolvedValue({ raw: [], affected: 0, generatedMaps: [] });
-      await expect(async () => { await matchesController.update('3', matches[0]) }).rejects.toThrow(NotFoundException);
+      await expect(async () => {
+        await matchesController.update('3', matches[0]);
+      }).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -103,7 +122,9 @@ describe('MatchesController', () => {
 
     it('should return 404 Not Found if the match is not deleted', async () => {
       jest.spyOn(matchesService, 'delete').mockResolvedValue({ raw: [], affected: 0 });
-      await expect(async () => { await matchesController.delete('3') }).rejects.toThrow(NotFoundException);
+      await expect(async () => {
+        await matchesController.delete('3');
+      }).rejects.toThrow(NotFoundException);
     });
   });
 });
