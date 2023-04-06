@@ -6,19 +6,19 @@ import { UserRole } from '../user.role';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as moment from 'moment';
+import { CreateUserDto, SignupUserDto, UserDto } from '../dto/';
 
 describe('UserService', () => {
   let usersService: UsersService;
   let usersRepository: Repository<User>;
 
-  let users: User[];
+  let users: UserDto[];
 
   beforeAll(async () => {
     users = [
       {
         id: '1',
         username: 'admin',
-        password: 'changeme',
         role: UserRole.Admin,
         createdAt: moment().format(),
         updatedAt: moment().format()
@@ -26,7 +26,6 @@ describe('UserService', () => {
       {
         id: '2',
         username: 'user',
-        password: 'password',
         role: UserRole.User,
         createdAt: moment().format(),
         updatedAt: moment().format()
@@ -64,15 +63,19 @@ describe('UserService', () => {
   });
 
   describe('findAll', () => {
-    it('should return all users', async () => {
-      expect(await usersService.findAll()).toBe(users);
+    it('should return an array of UserDto', async () => {
+      expect(await usersService.findAll()).toStrictEqual(users);
     });
   });
 
   describe('findOneById', () => {
-    it('should return a user', async () => {
-      jest.spyOn(usersRepository, 'findOneOrFail').mockResolvedValue(users[0]);
-      expect(await usersService.findOneById('1')).toBe(users[0]);
+    it('should return a UserDto', async () => {
+      const user: User = {
+        password: 'changeme',
+        ...users[0]
+      };
+      jest.spyOn(usersRepository, 'findOneOrFail').mockResolvedValue(user);
+      expect(await usersService.findOneById('1')).toStrictEqual(users[0]);
     });
 
     it('should reject the promise if the user is not found', async () => {
@@ -85,25 +88,47 @@ describe('UserService', () => {
   });
 
   describe('findOneByUsername', () => {
-    it('should return one user', async () => {
-      jest.spyOn(usersRepository, 'findOneOrFail').mockResolvedValue(users[0]);
-      expect(await usersService.findOneByUsername('admin')).toBe(users[0]);
+    it('should return one UserDto', async () => {
+      const user: User = {
+        password: 'changeme',
+        ...users[0]
+      };
+      jest.spyOn(usersRepository, 'findOneOrFail').mockResolvedValue(user);
+      expect(await usersService.findOneByUsername('admin')).toBe(user);
     });
   });
 
   describe('create', () => {
-    it('should return a user', async () => {
-      const user: User = new User();
-      user.username = 'User';
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    jest.spyOn(bcrypt, 'hash').mockImplementation((data, salt) => Promise.resolve(''));
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      jest.spyOn(bcrypt, 'hash').mockImplementation((data, salt) => Promise.resolve(''));
+    it('should return a UserDto from CreateUserDto', async () => {
+      const user = new CreateUserDto();
+      user.username = 'admin';
+      user.password = 'password';
+      user.role = UserRole.Admin;
 
       expect(await usersService.create(user)).toEqual(
         expect.objectContaining({
           id: expect.any(String),
           username: user.username,
-          password: expect.any(String),
+          role: user.role,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String)
+        })
+      );
+    });
+
+    it('should return a UserDto from SignupUserDto', async () => {
+      const user = new SignupUserDto();
+      user.username = 'admin';
+      user.password = 'password';
+
+      expect(await usersService.create(user)).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          username: user.username,
+          role: UserRole.User,
           createdAt: expect.any(String),
           updatedAt: expect.any(String)
         })

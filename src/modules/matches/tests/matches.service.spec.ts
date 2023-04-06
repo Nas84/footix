@@ -3,32 +3,45 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { MatchesService } from '../matches.service';
 import { Match } from '../match.entity';
 import * as moment from 'moment';
+import { CreateMatchDto, MatchDto, UpdateMatchDto } from '../dto';
+import { Team } from '../../teams/team.entity';
+import { TeamDto } from '../../teams/dto';
 
 describe('MatchesService', () => {
   let matchesService: MatchesService;
   let matches: Match[];
+  let team: Team;
+  let matchesDto: MatchDto[];
 
   beforeAll(async () => {
+    team = new Team();
+    team.id = '1';
+    team.name = 'HomeTeam';
+    team.createdAt = moment().format();
+    team.updatedAt = moment().format();
+
     matches = [
       {
-        id: '1',
-        home_team: null,
+        id: 'a264b9a9-b37c-4494-bb9f-58ee6be5a74e',
+        home_team: team,
         home_score: 0,
-        away_team: null,
+        away_team: team,
         away_score: 0,
         createdAt: moment().format(),
         updatedAt: moment().format()
       },
       {
-        id: '2',
-        home_team: null,
+        id: 'f01cea3c-1d94-4231-9696-571df0953cf0',
+        home_team: team,
         home_score: 0,
-        away_team: null,
+        away_team: team,
         away_score: 0,
         createdAt: moment().format(),
         updatedAt: moment().format()
       }
     ];
+
+    matchesDto = await Promise.all(matches.map((match) => MatchDto.fromEntity(match)));
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [],
@@ -41,7 +54,6 @@ describe('MatchesService', () => {
             findOneOrFail: jest.fn().mockResolvedValue(matches[0]),
             save: jest.fn().mockImplementation((match: Match) =>
               Promise.resolve({
-                id: 'id',
                 createdAt: moment().format(),
                 updatedAt: moment().format(),
                 ...match
@@ -54,6 +66,12 @@ describe('MatchesService', () => {
             delete: jest.fn().mockImplementation((id: string) => Promise.resolve({ raw: [], affected: 1 }))
             /* eslint-enable */
           }
+        },
+        {
+          provide: getRepositoryToken(Team),
+          useValue: {
+            findOneOrFail: jest.fn().mockResolvedValue(team)
+          }
         }
       ]
     }).compile();
@@ -62,32 +80,30 @@ describe('MatchesService', () => {
   });
 
   describe('findAll', () => {
-    it('should return one team', async () => {
-      expect(await matchesService.findAll()).toBe(matches);
+    it('should return an array of MatchDto', async () => {
+      expect(await matchesService.findAll()).toStrictEqual(matchesDto);
     });
   });
 
   describe('findOneById', () => {
-    it('should return one team', async () => {
-      expect(await matchesService.findOneById('1')).toBe(matches[0]);
+    it('should return one MatchDto', async () => {
+      expect(await matchesService.findOneById('1')).toStrictEqual(matchesDto[0]);
     });
   });
 
   describe('create', () => {
-    it('should return a team', async () => {
-      const match: Match = new Match();
-      match.home_score = 1;
-      match.home_team = null;
-      match.away_score = 2;
-      match.away_team = null;
+    it('should return a MatchDto', async () => {
+      const match = new CreateMatchDto();
+      match.home_team = '24c599df-5293-40f1-a706-019ece026932';
+      match.away_team = '6ea72d21-3c0b-4323-b57f-b98bff5219da';
 
       expect(await matchesService.create(match)).toEqual(
         expect.objectContaining({
           id: expect.any(String),
-          home_team: null,
-          home_score: match.home_score,
-          away_team: null,
-          away_score: match.away_score,
+          home_team: expect.any(TeamDto),
+          home_score: 0,
+          away_team: expect.any(TeamDto),
+          away_score: 0,
           createdAt: expect.any(String),
           updatedAt: expect.any(String)
         })
@@ -97,7 +113,11 @@ describe('MatchesService', () => {
 
   describe('update', () => {
     it('should return an UpdateResult with one raw affected', async () => {
-      expect(await matchesService.update(matches[0].id, matches[0])).toEqual(
+      const match = new UpdateMatchDto();
+      match.home_score = 1;
+      match.away_score = 3;
+
+      expect(await matchesService.update('1', match)).toEqual(
         expect.objectContaining({
           raw: expect.any(Array),
           affected: 1

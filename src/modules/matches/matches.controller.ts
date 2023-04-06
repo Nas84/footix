@@ -10,26 +10,45 @@ import {
   HttpCode,
   NotFoundException
 } from '@nestjs/common';
-import { Match } from './match.entity';
 import { MatchesService } from './matches.service';
-import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateMatchDto, MatchDto, UpdateMatchDto } from './dto';
 
-@ApiTags('Matches')
 @Controller('api/matches')
+@ApiTags('Matches')
+@ApiBearerAuth()
 export class MatchesController {
   constructor(private matchesService: MatchesService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAll(): Promise<Match[]> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Finds all matches' })
+  @ApiOkResponse({ description: 'Return all matches', type: [MatchDto] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'No match found' })
+  async getAll(): Promise<MatchDto[]> {
     return this.matchesService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiParam({ name: 'id', type: String })
   @Get('/:id')
-  async getById(@Param('id') id: string): Promise<Match> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Finds a match by its id' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiOkResponse({ description: 'Return a match', type: MatchDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Match not found' })
+  async getById(@Param('id') id: string): Promise<MatchDto> {
     try {
       return await this.matchesService.findOneById(id);
     } catch (err) {
@@ -37,19 +56,27 @@ export class MatchesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: [Match] })
   @Post()
-  async create(@Body() match: Match): Promise<any> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a new match' })
+  @ApiBody({ type: [CreateMatchDto] })
+  @ApiOkResponse({ description: 'The match has been successfully created.', type: MatchDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Match not found' })
+  async create(@Body() match: CreateMatchDto): Promise<any> {
     return this.matchesService.create(match);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiParam({ name: 'id', type: String })
-  @ApiBody({ type: [Match] })
   @Put('/:id')
   @HttpCode(204)
-  async update(@Param('id') id: string, @Body() match: Match): Promise<any> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update a match score' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiNoContentResponse({ description: 'The match has been successfully updated.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Match not found' })
+  @ApiBody({ type: [UpdateMatchDto] })
+  async update(@Param('id') id: string, @Body() match: UpdateMatchDto): Promise<any> {
     const result = await this.matchesService.update(id, match);
 
     if (result.affected === 0) {
@@ -57,9 +84,13 @@ export class MatchesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete('/:id')
   @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Delete a match' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiNoContentResponse({ description: 'The maztch has been successfully deleted.' })
+  @ApiNotFoundResponse({ description: 'Match not found' })
   async delete(@Param('id') id: string): Promise<any> {
     const result = await this.matchesService.delete(id);
 

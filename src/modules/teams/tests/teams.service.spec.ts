@@ -3,10 +3,11 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { TeamsService } from '../teams.service';
 import { Team } from '../team.entity';
 import * as moment from 'moment';
+import { CreateTeamDto, TeamDto, UpdateTeamDto } from '../dto';
 
 describe('TeamsService', () => {
   let teamsService: TeamsService;
-  let teams: Team[];
+  let teams: TeamDto[];
 
   beforeAll(async () => {
     teams = [
@@ -67,8 +68,9 @@ describe('TeamsService', () => {
 
   describe('create', () => {
     it('should return a team', async () => {
-      const team: Team = new Team();
-      team.name = 'Team';
+      const team: CreateTeamDto = {
+        name: 'Team'
+      };
 
       expect(await teamsService.create(team)).toEqual(
         expect.objectContaining({
@@ -83,11 +85,9 @@ describe('TeamsService', () => {
 
   describe('update', () => {
     it('should return an UpdateResult with one raw affected', async () => {
-      const team: Team = {
+      const team: UpdateTeamDto = {
         id: 'id',
-        name: 'Team',
-        createdAt: '2023-02-28T22:44:26.000Z',
-        updatedAt: '2023-02-28T22:44:26.000Z'
+        name: 'Team'
       };
 
       expect(await teamsService.update(team.id, team)).toEqual(

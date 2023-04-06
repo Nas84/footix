@@ -6,14 +6,14 @@ export class Match {
   @PrimaryColumn()
   id: string;
 
-  @ManyToOne(() => Team)
+  @ManyToOne(() => Team, (team) => team.home_matches)
   @JoinColumn()
   home_team: Team;
 
   @Column()
   home_score: number;
 
-  @ManyToOne(() => Team)
+  @ManyToOne(() => Team, (team) => team.away_matches)
   @JoinColumn()
   away_team: Team;
 

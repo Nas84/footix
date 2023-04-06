@@ -10,6 +10,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Var
+var/footix.db
+
 # OS
 .DS_Store
 
