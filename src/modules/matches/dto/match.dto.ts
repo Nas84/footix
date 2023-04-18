@@ -9,13 +9,13 @@ export class MatchDto {
   @ApiProperty({ type: TeamDto })
   home_team: TeamDto;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: Number, minimum: 0, default: 0 })
   home_score: number;
 
   @ApiProperty({ type: TeamDto })
   away_team: TeamDto;
 
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: Number, minimum: 0, default: 0 })
   away_score: number;
 
   @ApiProperty({ type: String })
