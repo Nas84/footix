@@ -4,11 +4,12 @@ import { TeamsController } from '../teams.controller';
 import { TeamsService } from '../teams.service';
 import * as moment from 'moment';
 import { NotFoundException } from '@nestjs/common';
+import { CreateTeamDto, TeamDto, UpdateTeamDto } from '../dto';
 
 describe('TeamsController', () => {
   let teamsService: TeamsService;
   let teamsController: TeamsController;
-  let teams: Team[];
+  let teams: TeamDto[];
 
   beforeAll(async () => {
     teams = [
@@ -78,8 +79,9 @@ describe('TeamsController', () => {
 
   describe('create', () => {
     it('should return a team', async () => {
-      const team: Team = new Team();
-      team.name = 'Team';
+      const team: CreateTeamDto = {
+        name: 'Team'
+      };
 
       expect(await teamsController.create(team)).toEqual(
         expect.objectContaining({
@@ -93,11 +95,9 @@ describe('TeamsController', () => {
   });
 
   describe('update', () => {
-    const team: Team = {
+    const team: UpdateTeamDto = {
       id: 'id',
-      name: 'Team',
-      createdAt: '2023-02-28T22:44:26.000Z',
-      updatedAt: '2023-02-28T22:44:26.000Z'
+      name: 'Team'
     };
 
     it('should be return 204 No Content when team is successfully updated', async () => {

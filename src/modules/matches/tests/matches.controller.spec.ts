@@ -1,31 +1,40 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MatchesController } from '../matches.controller';
 import { MatchesService } from '../matches.service';
-import { Match } from '../match.entity';
 import * as moment from 'moment';
 import { NotFoundException } from '@nestjs/common';
+import { CreateMatchDto, MatchDto } from '../dto';
+import { TeamDto } from '../../teams/dto';
 
 describe('MatchesController', () => {
   let matchesController: MatchesController;
   let matchesService: MatchesService;
-  let matches: Match[];
+  let matches: MatchDto[];
+  let team: TeamDto;
 
   beforeAll(async () => {
+    team = {
+      id: '1',
+      name: 'Team1',
+      createdAt: moment().format(),
+      updatedAt: moment().format()
+    };
+
     matches = [
       {
-        id: '1',
-        home_team: null,
+        id: 'a264b9a9-b37c-4494-bb9f-58ee6be5a74e',
+        home_team: team,
         home_score: 0,
-        away_team: null,
+        away_team: team,
         away_score: 0,
         createdAt: moment().format(),
         updatedAt: moment().format()
       },
       {
-        id: '2',
-        home_team: null,
+        id: 'f01cea3c-1d94-4231-9696-571df0953cf0',
+        home_team: team,
         home_score: 0,
-        away_team: null,
+        away_team: team,
         away_score: 0,
         createdAt: moment().format(),
         updatedAt: moment().format()
@@ -45,6 +54,8 @@ describe('MatchesController', () => {
               Promise.resolve({
                 ...match,
                 id: 'id',
+                home_score: 0,
+                away_score: 0,
                 createdAt: moment().format(),
                 updatedAt: moment().format()
               })
@@ -80,19 +91,17 @@ describe('MatchesController', () => {
 
   describe('create', () => {
     it('should create a match', async () => {
-      const match = new Match();
-      match.home_score = 1;
-      match.home_team = null;
-      match.away_score = 2;
-      match.away_team = null;
+      const match = new CreateMatchDto();
+      match.home_team = '24c599df-5293-40f1-a706-019ece026932';
+      match.away_team = '6ea72d21-3c0b-4323-b57f-b98bff5219da';
 
       expect(await matchesController.create(match)).toEqual(
         expect.objectContaining({
           id: expect.any(String),
-          home_team: null,
-          home_score: match.home_score,
-          away_team: null,
-          away_score: match.away_score,
+          home_team: match.home_team,
+          home_score: 0,
+          away_team: match.away_team,
+          away_score: 0,
           createdAt: expect.any(String),
           updatedAt: expect.any(String)
         })

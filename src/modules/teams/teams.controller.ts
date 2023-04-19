@@ -10,26 +10,45 @@ import {
   HttpCode,
   NotFoundException
 } from '@nestjs/common';
-import { Team } from './team.entity';
 import { TeamsService } from './teams.service';
-import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnauthorizedResponse
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateTeamDto, TeamDto, UpdateTeamDto } from './dto/';
 
-@ApiTags('Teams')
 @Controller('api/teams')
+@ApiTags('Teams')
+@ApiBearerAuth()
 export class TeamsController {
   constructor(private teamsService: TeamsService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAll(): Promise<Team[]> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Finds all teams' })
+  @ApiOkResponse({ description: 'Return all teams', type: [TeamDto] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'No team found' })
+  async getAll(): Promise<TeamDto[]> {
     return this.teamsService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiParam({ name: 'id', type: String })
   @Get(':id')
-  async getById(@Param('id') id: string): Promise<Team> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Finds a team by its id' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiOkResponse({ description: 'Return a team', type: TeamDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Team not found' })
+  async getById(@Param('id') id: string): Promise<TeamDto> {
     try {
       return await this.teamsService.findOneById(id);
     } catch (err) {
@@ -37,19 +56,27 @@ export class TeamsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: [Team] })
   @Post()
-  async create(@Body() team: Team): Promise<any> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a new team' })
+  @ApiBody({ type: CreateTeamDto })
+  @ApiOkResponse({ description: 'The team has been successfully created.', type: TeamDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Team not found' })
+  async create(@Body() team: CreateTeamDto): Promise<any> {
     return this.teamsService.create(team);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiParam({ name: 'id', type: String })
-  @ApiBody({ type: [Team] })
   @Put(':id')
   @HttpCode(204)
-  async update(@Param('id') id: string, @Body() team: Team): Promise<any> {
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update an existing team' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiNoContentResponse({ description: 'The team has been successfully updated.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Team not found' })
+  @ApiBody({ type: UpdateTeamDto })
+  async update(@Param('id') id: string, @Body() team: UpdateTeamDto): Promise<any> {
     const result = await this.teamsService.update(id, team);
 
     if (result.affected === 0) {
@@ -57,9 +84,13 @@ export class TeamsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Delete a team' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiNoContentResponse({ description: 'The team has been successfully deleted.' })
+  @ApiNotFoundResponse({ description: 'Team not found' })
   async delete(@Param('id') id: string): Promise<any> {
     const result = await this.teamsService.delete(id);
 

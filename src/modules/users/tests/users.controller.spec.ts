@@ -1,23 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { User } from '../user.entity';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
 import { UserRole } from '../user.role';
 import * as moment from 'moment';
 import { NotFoundException } from '@nestjs/common';
+import { CreateUserDto, SignupUserDto, UpdateUserDto, UserDto } from '../dto';
 
 describe('UsersController', () => {
   let usersService: UsersService;
   let userController: UsersController;
 
-  let users: User[];
+  let users: UserDto[];
 
   beforeAll(async () => {
     users = [
       {
         id: '1',
         username: 'admin',
-        password: 'changeme',
         role: UserRole.Admin,
         createdAt: moment().format(),
         updatedAt: moment().format()
@@ -25,7 +24,6 @@ describe('UsersController', () => {
       {
         id: '2',
         username: 'user',
-        password: 'password',
         role: UserRole.User,
         createdAt: moment().format(),
         updatedAt: moment().format()
@@ -40,12 +38,13 @@ describe('UsersController', () => {
           useValue: {
             findAll: jest.fn().mockResolvedValue(users),
             findOneById: jest.fn(),
-            create: jest.fn().mockImplementation((user: User) =>
+            create: jest.fn().mockImplementation((user: CreateUserDto | SignupUserDto) =>
               Promise.resolve({
                 id: 'id',
                 createdAt: moment().format(),
                 updatedAt: moment().format(),
-                ...user
+                username: user.username,
+                role: 'role' in user ? user.role : UserRole.User
               })
             ),
             update: jest.fn(),
@@ -81,7 +80,7 @@ describe('UsersController', () => {
   });
 
   describe('signup', () => {
-    const user = new User();
+    const user = new SignupUserDto();
     user.username = 'user';
     user.password = 'password';
 
@@ -90,7 +89,6 @@ describe('UsersController', () => {
         expect.objectContaining({
           id: expect.any(String),
           username: user.username,
-          password: expect.any(String),
           role: UserRole.User,
           createdAt: expect.any(String),
           updatedAt: expect.any(String)
@@ -100,7 +98,7 @@ describe('UsersController', () => {
   });
 
   describe('create', () => {
-    const user = new User();
+    const user = new CreateUserDto();
     user.username = 'admin';
     user.password = 'password';
     user.role = UserRole.Admin;
@@ -110,7 +108,6 @@ describe('UsersController', () => {
         expect.objectContaining({
           id: expect.any(String),
           username: user.username,
-          password: expect.any(String),
           role: user.role,
           createdAt: expect.any(String),
           updatedAt: expect.any(String)
@@ -120,13 +117,11 @@ describe('UsersController', () => {
   });
 
   describe('update', () => {
-    const user: User = {
+    const user: UpdateUserDto = {
       id: 'id',
       username: 'user',
       password: 'password',
-      role: UserRole.User,
-      createdAt: '2023-02-28T22:44:26.000Z',
-      updatedAt: '2023-02-28T22:44:26.000Z'
+      role: UserRole.User
     };
 
     it('should return 204 No Content when user is successfully updated', async () => {
